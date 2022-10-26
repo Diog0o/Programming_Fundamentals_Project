@@ -192,17 +192,8 @@ e o valor de cada chave é a soma dos votos de cada partido em todas as regiões
 Na segunda posição do tuplo tem um dicionário onde novamente tem como chaves o nome de cada um dos partidos
 que participou e o valor de cada chave é o número de mandatos que cada partido tem direito.
 
-Verifica a validade dos argumentos
 """
 def lista_deputados_votos_aux(dic):
-    if (type(dic) != dict or len(dic) == 0):
-        raise ValueError('obtem_resultado_eleicoes: argumento invalido')
-    for key in dic: 
-        if ( type(dic[key]) != dict or "deputados" not in dic[key] or "votos" not in dic[key] or len(dic[key]["votos"])==0 or type(dic[key]["votos"])!= dict):
-            raise ValueError('obtem_resultado_eleicoes: argumento invalido')
-        for key2 in dic[key]["votos"]:
-            if  ( type(dic[key]["deputados"]) != int or dic[key]["deputados"] <= 0 or type(key2) != str or key2 == "" or type(dic[key]["votos"][key2]) != int or dic[key]["votos"][key2] <=0): #confirma os argumentos
-                raise ValueError ('obtem_resultado_eleicoes: argumento invalido')
     deputados=dicionario_partidos(dic) #Vai pegar os dicionários vazios com a função anterior tanto para o número de votos como para os deputados eleitos
     votos=dicionario_partidos(dic)
     for key in dic:
@@ -221,10 +212,18 @@ por 3 entradas. Na primeira o nome do partido, no segundo o número de mandatos 
 o número de votos. Os tuplos devem ser apresentados por ordem decrescente de número de mandatos. Caso
 haja empate deve aparecer primeiro aquele que tem menor numero de votos.
 
-A verificação dos argumentos foi feita numa das funções auxiliares.
+Verifica a validade dos argumentos
 """
 
 def obtem_resultado_eleicoes(dic):
+    if (type(dic) != dict or len(dic) == 0):
+        raise ValueError('obtem_resultado_eleicoes: argumento invalido')
+    for key in dic: 
+        if ( type(dic[key]) != dict or "deputados" not in dic[key] or "votos" not in dic[key] or len(dic[key]["votos"])==0 or type(dic[key]["votos"])!= dict):
+            raise ValueError('obtem_resultado_eleicoes: argumento invalido')
+        for key2 in dic[key]["votos"]:
+            if  ( type(dic[key]["deputados"]) != int or dic[key]["deputados"] <= 0 or type(key2) != str or key2 == "" or type(dic[key]["votos"][key2]) != int or dic[key]["votos"][key2] <=0): #confirma os argumentos
+                raise ValueError ('obtem_resultado_eleicoes: argumento invalido')
     deputados= lista_deputados_votos_aux(dic)[0] #Vai buscar os dicionários da função anterior já com os dados
     votos = lista_deputados_votos_aux(dic)[1]
     vistos=[] # uma lista onde vamos adicionando os partidos que já foram colocados no resultado para não haver repetições
