@@ -19,6 +19,8 @@ a String com as palavras completas desde o inicio da cadeia original chegar ao l
 def corta_texto(cadeia, value):  
     if not (type(value) == int and value>=0):
         raise ValueError("O número colocado não é um inteiro")
+    if (len(cadeia) == value): #Caso o tamanaho da coluna seja igual ao comprimento do texto
+        return (cadeia,"")
     value =value-1
     if (value >= len(cadeia)): #Quando o valor do value é maior do que a len da cadeia de caracteres dada
         return (cadeia,"")
@@ -32,6 +34,7 @@ def corta_texto(cadeia, value):
             i=i-1
         return (cadeia[:i].strip(),cadeia[i:].strip()) #utilizamos o .strip() para garantir que não há espaços no inicio nem no final
 
+
 """
 Recebe uma String e um inteiro e devolve uma String
 
@@ -40,17 +43,27 @@ Caso a String seja composta por duas ou mais palavras, pega na String dada e adi
 até que o número de caracteres da String seja igual ao inteiro fornecido.
 """
 
-def insere_espacos(cadeia, value):
+def insere_espacos(cadeia,value):
     if (len(cadeia.split()) == 1):
         while len(cadeia) <value:
             cadeia= cadeia + " "
         return cadeia
-    else:
-        while len(cadeia) < value:
-            for i in range (len(cadeia)-1,0,-1): #percorre a lista de caracteres de trás para a frente
-                if (cadeia[i] == " " and cadeia[i-1] != " " and len(cadeia) < value): #Temos que ir de tras para a frente porque senão não dava para adicionar os espaços
-                    cadeia= cadeia[:i] + " " + cadeia[i:] #quando detecta um espaço e o caracter anterior é diferente de um espaço adiciona mais um espaço
-        return cadeia
+    conta_espacos =0
+    for i in cadeia:
+        if i== " ":
+            conta_espacos= conta_espacos +1
+    while len(cadeia) < value:
+        j=0
+        tamanho =len(cadeia)
+        while j < tamanho + conta_espacos:
+            if len(cadeia) == value:
+                return cadeia
+            if cadeia[j] == " " and cadeia[j+1] != " ":
+                cadeia = cadeia[:j] + " " + cadeia[j:]
+                j=j+2
+            else:
+                j=j+1
+    return cadeia # Se o valor do len(cadeia) for igual ao tamanho da coluna
 """
 Recebe uma String não vazia e um inteiro e devolve um tuplo de cadeias de caracteres
 
@@ -61,15 +74,31 @@ do inteiro dado
 """
    
 def justifica_texto (cadeia, value):
-    if (len(cadeia) == 0 or type(value) != int or value < 1): #valida os argumentos
-        raise ValueError ("justifica texto : argumentos invalidos")
+    if (type(cadeia) != str or len(cadeia) == 0 or type(value) != int or value < 1): #valida os argumentos
+        raise ValueError ('justifica_texto: argumentos invalidos')
     else:
         texto= limpa_texto(cadeia)
         res= corta_texto(texto,value)
+        if (len(res[0]) == 0):
+            raise ValueError('justifica_texto: argumentos invalidos')
         lista=(insere_espacos(res[0],value),)
+        if len(res[1]) == 0: #Caso apenas haja uma linha e seja logo no inicio
+            aux= res[0]
+            while len(aux) <value:
+                aux= aux + " "
+            lista_caso_especial= (aux,)
+            return lista_caso_especial
         while len(res[1]) != 0: # no final, quando o texto acabar o res vai ser do tipo ("......", "").Logo quando len(res[1]) for igual a 0 sabemos que o texto a justificar terminou
             res= corta_texto(res[1],value) #atualiza o res
-            lista= lista + (insere_espacos(res[0],value),) #insere os espaços e adiciona no resultado final
+            if (len(res[0]) == 0):
+                raise ValueError('justifica_texto: argumentos invalidos')
+            if len(res[1]) != 0:
+                lista= lista + (insere_espacos(res[0],value),) #insere os espaços e adiciona no resultado final
+            else: #caso da ultima linha 
+                aux1= res[0]
+                while len(aux1) <value:
+                    aux1= aux1 + " "
+                lista= lista + (aux1,)         
     return lista
     
 #cad = "Computers are incredibly \n\tfast, \n\t\taccurate \n\t\t\tand stupid. \n Human beings are incredibly slow inaccurate, and brilliant. \n Together they are powerful beyond imagination."
@@ -166,12 +195,16 @@ que participou e o valor de cada chave é o número de mandatos que cada partido
 Verifica a validade dos argumentos
 """
 def lista_deputados_votos_aux(dic):
+    if (type(dic) != dict or len(dic) == 0):
+        raise ValueError('obtem_resultado_eleicoes: argumento invalido')
+    for key in dic: 
+        if ( type(dic[key]) != dict or "deputados" not in dic[key] or "votos" not in dic[key] or len(dic[key]["votos"])==0 or type(dic[key]["votos"])!= dict):
+            raise ValueError('obtem_resultado_eleicoes: argumento invalido')
+        for key2 in dic[key]["votos"]:
+            if  ( type(dic[key]["deputados"]) != int or dic[key]["deputados"] <= 0 or type(key2) != str or key2 == "" or type(dic[key]["votos"][key2]) != int or dic[key]["votos"][key2] <=0): #confirma os argumentos
+                raise ValueError ('obtem_resultado_eleicoes: argumento invalido')
     deputados=dicionario_partidos(dic) #Vai pegar os dicionários vazios com a função anterior tanto para o número de votos como para os deputados eleitos
     votos=dicionario_partidos(dic)
-    for key in dic: 
-        for key2 in dic[key]["votos"]:
-            if  type(dic[key]["deputados"]) != int or dic[key]["deputados"] <= 0 or type(key2) != str or key2 == "" or dic[key]["votos"][key2] <=0 or type (dic[key]["votos"][key2]) != int: #confirma os argumentos
-                raise ValueError ("argumentos inválidos")
     for key in dic:
         mandatos = atribui_mandatos(dic[key]["votos"], dic[key]["deputados"]) #calcula os mandatos por cada região
         for i in mandatos:
@@ -197,7 +230,7 @@ def obtem_resultado_eleicoes(dic):
     vistos=[] # uma lista onde vamos adicionando os partidos que já foram colocados no resultado para não haver repetições
     res=[]
     while len(vistos) < len(obtem_partidos(dic)): #Enquanto o comprimento da lista dos partidos já colocados no resultado for menor que o comprimento dos partidos que participaram na eleição significa que ainda não foram colocados todos os partidos
-        max=0
+        max=-1
         chave=""
         for key in deputados: #um ciclo que vai achar qual o partido que teve mais deputados para serem apresentados por ordem decrescente
             if deputados[key] > max and key not in vistos:
@@ -226,7 +259,7 @@ def produto_interno (t1,t2):
     res=0
     for i in range(len(t1)):
         res = res + t1[i]*t2[i]
-    return res
+    return float(res)
 
 """
 Recebe 3 tuplos de igual dimensão e um valor real positivo e devolve um booleano
@@ -303,15 +336,22 @@ No final devolve um tuplo que é o resultado de aplicar o método de Jacobi.
 """
 
 def resolve_sistema(matriz,c,e): #começamos com um valor de x =(0,0,0)
+    if (type(matriz) != tuple or type(c) != tuple or len(matriz) == 0 or not isinstance(e,(int, float)) or e <= 0):
+        raise ValueError('resolve_sistema: argumentos invalidos')
     for i in range(len(matriz)):
-        if len(matriz[i]) != len(matriz[0]) or len(matriz[0]) != len(c) or not isinstance(matriz[i],tuple) or not isinstance(c, tuple):
-            raise ValueError("resolve_sistema: argumentos invalidos")
+        if (type(matriz[i]) != tuple or len(matriz[i]) != len(matriz[0]) or len(matriz) != len(matriz[0]) or len(matriz[0]) != len(c)):
+            raise ValueError('resolve_sistema: argumentos invalidos')
         for j in range (len(matriz[0])):
-            if not isinstance(matriz[i][j],(int, float)):
-                raise ValueError ("resolve_sistema: argumentos invalidos")
+            if (not isinstance(matriz[i][j],(int, float)) or not isinstance(c[i],(int,float))):
+                raise ValueError ('resolve_sistema: argumentos invalidos')
     if eh_diagonal_dominante(matriz) == False:
-        raise ValueError("resolve sistema: matriz nao diagonal dominante")
+        raise ValueError('resolve_sistema: matriz nao diagonal dominante')
     x = tuple ([0] * len(matriz[0]))
+    matriz= retira_zeros_diagonal (matriz, c)[0]
+    c= retira_zeros_diagonal (matriz, c)[1]
+    for l in range(len(matriz)):
+        if matriz[l][l] == 0:
+            raise ValueError('resolve_sistema: argumentos invalidos')
     while verifica_convergencia(matriz,c, x, e) == False:
         nova_lista_x = []
         for k in range(len(matriz)): # vai atualizar o valor do resultado x
@@ -319,19 +359,3 @@ def resolve_sistema(matriz,c,e): #começamos com um valor de x =(0,0,0)
             nova_lista_x.insert(k, novo_valor_x)
         x= tuple (nova_lista_x)
     return x
-
-
-
-
-#print(produto_interno((1,2,3,4,5),(-4,5,-6,7,-8)))
-#A1, c1 = ((1, -0.5), (-1, 2)), (-0.4, 1.9)
-#print( verifica_convergencia(A1, c1, (0.1001, 1), 0.00001))
-#print(verifica_convergencia(A1, c1, (0.1001, 1), 0.001))
-#A2, c2 = ((0, 1, 1), (1, 0, 0), (0, 1, 0)), (1, 2, 3)
-#print (retira_zeros_diagonal(A2, c2))
-#A3 = ((1, 2, 3, 4, 5),(4, -5, 6, -7, 8), (1, 3, 5, 3, 1),(-1, 0, -1, 0, -1), (0, 2, 4, 6, 8))
-#print (eh_diagonal_dominante(A3))
-#print(eh_diagonal_dominante(((1, 0, 0), (0, 1, 0), (0, 1, 1))))
-
-A4, c4 = ((2, -1, -1), (2, -9, 7), (-2, 5, -9)), (-8, 8, -6)
-print(resolve_sistema(A4, c4, 1e-20))
