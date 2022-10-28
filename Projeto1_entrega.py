@@ -96,7 +96,8 @@ def justifica_texto (cadeia, value):
                 aux= aux + " "
             lista_caso_especial= (aux,)
             return lista_caso_especial
-        while len(res[1]) != 0: 
+        while len(res[1]) != 0:
+            res= corta_texto(res[1],value) 
             if (len(res[0]) == 0):
                 raise ValueError('justifica_texto: argumentos invalidos')
             if len(res[1]) != 0:
