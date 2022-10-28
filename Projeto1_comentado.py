@@ -30,9 +30,9 @@ def corta_texto(cadeia, value):
         return (cadeia[:value +1].strip(),cadeia[value+2:].strip())
     else:                               #Quando o valor calha a meio de uma palavra
         i= value
-        while (cadeia[i] != " " and i >0): # ciclo que vai ver onde começa essa palavra que iria ser cortada
+        while (cadeia[i] != " " and i >0):
             i=i-1
-        return (cadeia[:i].strip(),cadeia[i:].strip()) #utilizamos o .strip() para garantir que não há espaços no inicio nem no final
+        return (cadeia[:i].strip(),cadeia[i:].strip())
 
 
 """
@@ -89,7 +89,7 @@ def justifica_texto (cadeia, value):
             lista_caso_especial= (aux,)
             return lista_caso_especial
         while len(res[1]) != 0: # no final, quando o texto acabar o res vai ser do tipo ("......", "").Logo quando len(res[1]) for igual a 0 sabemos que o texto a justificar terminou
-            res= corta_texto(res[1],value) #atualiza o res
+            res= corta_texto(res[1],value)
             if (len(res[0]) == 0):
                 raise ValueError('justifica_texto: argumentos invalidos')
             if len(res[1]) != 0:
@@ -101,10 +101,6 @@ def justifica_texto (cadeia, value):
                 lista= lista + (aux1,)         
     return lista
     
-#cad = "Computers are incredibly \n\tfast, \n\t\taccurate \n\t\t\tand stupid. \n Human beings are incredibly slow inaccurate, and brilliant. \n Together they are powerful beyond imagination."
-#print(justifica_texto(cad, 60))
-#for l in justifica_texto(cad, 60): print(l)
-#print(corta_texto("Fundamentos da Programação",10))
 
 ## EXERCICIO 2
 
@@ -136,20 +132,20 @@ deputado e assim sucessivamente...Caso existam dois partidos com o mesmo quocien
 a quem tem menos votos.
 """
 def atribui_mandatos (dic,deputados):
-    tabela = calcula_quocientes(dic,deputados) #vai fazer os quocientes 
+    tabela = calcula_quocientes(dic,deputados)
     res= []
-    while len(res) < deputados: #temos que eleger mandatos até ao valor de deputados que nos é dado
+    while len(res) < deputados: 
         max=0
         index=0
         chave=""
         for key in tabela: #percorre os valores dos quocientes todos e vai buscar o maior deles guardando o index e a chave para no final apagar da lista, para na próxima contagem não ser contabilizado
             for i in range(len(tabela[key])):
-                if tabela[key][i] > max: #se for maior damos update no valor máximo, no index e na key
+                if tabela[key][i] > max: 
                     max = tabela[key][i]
                     index =i
                     chave = key
                 if tabela[key][i] == max: #no caso de haver empate escolhemos aquele que teve menos votos
-                    if dic[key] < dic[chave]: #vê qual deles tem menos fotos e escolhe o que tem menos
+                    if dic[key] < dic[chave]: 
                         max= tabela[key][i]
                         index =i
                         chave = key
@@ -182,8 +178,7 @@ def dicionario_partidos (dic):
         dicionario[i]=0
     return dicionario
 
-#Outra função auxiliar que vai percorrer a lista incial dada e criar dois dicionários diferentes.
-#Um com os deputados eleitos por cada partido e outro com o número total de votos
+
 """
 Recebe um dicionário e devolve um tuplo de dicionários
 
@@ -194,7 +189,7 @@ que participou e o valor de cada chave é o número de mandatos que cada partido
 
 """
 def lista_deputados_votos_aux(dic):
-    deputados=dicionario_partidos(dic) #Vai pegar os dicionários vazios com a função anterior tanto para o número de votos como para os deputados eleitos
+    deputados=dicionario_partidos(dic)
     votos=dicionario_partidos(dic)
     for key in dic:
         mandatos = atribui_mandatos(dic[key]["votos"], dic[key]["deputados"]) #calcula os mandatos por cada região
@@ -219,10 +214,14 @@ def obtem_resultado_eleicoes(dic):
     if (type(dic) != dict or len(dic) == 0):
         raise ValueError('obtem_resultado_eleicoes: argumento invalido')
     for key in dic: 
-        if ( type(dic[key]) != dict or "deputados" not in dic[key] or "votos" not in dic[key] or len(dic[key]["votos"])==0 or type(dic[key]["votos"])!= dict):
+        if ( type(key) != str or key =="" or type(dic[key]) != dict or len(dic[key]) != 2 \
+            or "deputados" not in dic[key] or "votos" not in dic[key] \
+                or type(dic[key]["votos"])!= dict or len(dic[key]["votos"])==0 \
+                    or type(dic[key]["deputados"]) != int or dic[key]["deputados"] <= 0):
             raise ValueError('obtem_resultado_eleicoes: argumento invalido')
         for key2 in dic[key]["votos"]:
-            if  ( type(dic[key]["deputados"]) != int or dic[key]["deputados"] <= 0 or type(key2) != str or key2 == "" or type(dic[key]["votos"][key2]) != int or dic[key]["votos"][key2] <=0): #confirma os argumentos
+            if  (type(key2) != str or key2 == "" or type(dic[key]["votos"][key2]) != int \
+                or dic[key]["votos"][key2] <=0):
                 raise ValueError ('obtem_resultado_eleicoes: argumento invalido')
     deputados= lista_deputados_votos_aux(dic)[0] #Vai buscar os dicionários da função anterior já com os dados
     votos = lista_deputados_votos_aux(dic)[1]
@@ -243,8 +242,6 @@ def obtem_resultado_eleicoes(dic):
         res= res +[(chave,deputados[chave],votos[chave])]
     return res
 
-# info = {"Endor": {"deputados": 7,"votos": {"A":12000, "B":7500, "C":5250, "D":3000}},"Hoth": {"deputados": 6,"votos": {"B":11500, "A":9000, "E":5000, "D":1500}},"Tatooine": {"deputados": 3,"votos": {"A":3000, "B":1900}}}
-# print(lista_deputados_votos_aux(info))
 
 ##EXERCICIO 3
 
@@ -270,10 +267,11 @@ precisão, e False caso contrário
 """
 
 def verifica_convergencia (A,c,x,e):
+    check=True
     for i in range(len(A)):
-        if abs(produto_interno(A[i],x) - c[i]) > e:
-            return False
-    return True
+        if abs(produto_interno(A[i],x) - c[i]) >= e:
+            check =False
+    return check
 
 """
 Recebe dois tuplos e devolve um tuplo
@@ -294,7 +292,7 @@ def retira_zeros_diagonal (matriz, c):
             if res_matriz[i][i] == 0:
                 bol=False
                 j=0
-                while bol ==False and j< len(matriz):
+                while bol == False and j< len(matriz):
                     if res_matriz[j][i] !=0 and res_matriz[i][j] !=0:
                         aux=res_matriz[i]
                         res_matriz [i] = res_matriz[j]
@@ -335,26 +333,25 @@ No final devolve um tuplo que é o resultado de aplicar o método de Jacobi.
 """
 
 def resolve_sistema(matriz,c,e): #começamos com um valor de x =(0,0,0)
-    if (type(matriz) != tuple or type(c) != tuple or len(matriz) == 0 or not isinstance(e,(int, float)) or e <= 0):
+    if (type(matriz) != tuple or type(c) != tuple or len(matriz) == 0 \
+        or len(c) == 0 or type(e) != float or e <= 0):
         raise ValueError('resolve_sistema: argumentos invalidos')
     for i in range(len(matriz)):
-        if (type(matriz[i]) != tuple or len(matriz[i]) != len(matriz[0]) or len(matriz) != len(matriz[0]) or len(matriz[0]) != len(c)):
+        if (type(matriz[i]) != tuple or len(matriz[i]) == 0 or len(matriz[i]) != len(matriz[0])\
+             or len(matriz) != len(matriz[i]) or len(matriz[i]) != len(c)):
             raise ValueError('resolve_sistema: argumentos invalidos')
-        for j in range (len(matriz[0])):
+        for j in range (len(matriz[i])):
             if (not isinstance(matriz[i][j],(int, float)) or not isinstance(c[i],(int,float))):
                 raise ValueError ('resolve_sistema: argumentos invalidos')
-    if eh_diagonal_dominante(matriz) == False:
-        raise ValueError('resolve_sistema: matriz nao diagonal dominante')
     x = tuple ([0] * len(matriz[0]))
-    matriz= retira_zeros_diagonal (matriz, c)[0]
-    c= retira_zeros_diagonal (matriz, c)[1]
-    for l in range(len(matriz)):
-        if matriz[l][l] == 0:
-            raise ValueError('resolve_sistema: argumentos invalidos')
-    while verifica_convergencia(matriz,c, x, e) == False:
+    new_matriz= retira_zeros_diagonal (matriz, c)[0]
+    new_c= retira_zeros_diagonal (matriz, c)[1]
+    if eh_diagonal_dominante(new_matriz) == False:
+        raise ValueError('resolve_sistema: matriz nao diagonal dominante')
+    while verifica_convergencia(new_matriz,new_c, x, e) == False:
         nova_lista_x = []
-        for k in range(len(matriz)): # vai atualizar o valor do resultado x
-            novo_valor_x = x[k] + (c[k] - produto_interno(matriz[k],x))/matriz[k][k]
+        for k in range(len(new_matriz)): # vai atualizar o valor do resultado x
+            novo_valor_x = x[k] + (new_c[k] - produto_interno(new_matriz[k],x))/new_matriz[k][k]
             nova_lista_x.insert(k, novo_valor_x)
         x= tuple (nova_lista_x)
     return x
